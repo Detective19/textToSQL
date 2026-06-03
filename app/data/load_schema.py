@@ -1,15 +1,30 @@
+from datasets import load_dataset
+
+
 def get_schema():
 
-    return [
+    dataset = load_dataset(
+        "beaverbench/beaver-table"
+    )
 
-        "departments: department information",
+    schemas = []
 
-        "enrollments: student enrollment records",
+    for split in dataset:
 
-        "courses: course details",
+        for row in dataset[split]:
 
-        "instructors: teacher information",
+            table = row[
+                "table_name"
+            ]
 
-        "students: student details"
+            cols = ", ".join(
+                row[
+                    "column_names"
+                ]
+            )
 
-    ]
+            schemas.append(
+                f"{table}: {cols}"
+            )
+
+    return schemas

@@ -4,24 +4,23 @@ import numpy as np
 
 from app.data.load_schema import get_schema
 
+
 SCHEMA = get_schema()
-# Load embedding model
+
+
 model = SentenceTransformer(
     "sentence-transformers/all-MiniLM-L6-v2"
 )
 
 
-# Create embeddings
 schema_vectors = model.encode(
     SCHEMA,
     normalize_embeddings=True
 )
 
-# Build index
-dimension = schema_vectors.shape[1]
 
 index = faiss.IndexFlatIP(
-    dimension
+    schema_vectors.shape[1]
 )
 
 index.add(
@@ -31,8 +30,7 @@ index.add(
 
 def retrieve_tables(
     question,
-    k=5,
-    threshold=0.65
+    k=5
 ):
 
     query = model.encode(
@@ -52,19 +50,23 @@ def retrieve_tables(
         indices[0]
     ):
 
-        if score >= threshold:
+        if score > 0.30:
+
+            table = (
+                SCHEMA[idx]
+                .split(":")[0]
+            )
 
             results.append(
-                {
-                    "table": SCHEMA[idx].split(":")[0],
-                    "score": float(score)
-                }
+                table
             )
 
     if not results:
-        return ["unknown"]
 
-    return [
-        x["table"]
-        for x in results
-    ]
+        return [
+            SCHEMA[
+                indices[0][0]
+            ].split(":")[0]
+        ]
+
+    return results

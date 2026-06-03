@@ -1,28 +1,47 @@
-def generate_sql(
+from app.services.llm_sql import (
+    generate_sql_llm
+)
+
+
+def fallback_sql(
     question,
     tables
 ):
 
     q = question.lower()
 
-    if (
-        "department" in q
-        and
-        "student" in q
-    ):
+    if "student" in q:
 
-        return """
-SELECT
-d.department_name,
-COUNT(e.student_id)
-FROM departments d
-JOIN enrollments e
-ON d.id=e.department_id
-GROUP BY d.department_name
-HAVING COUNT(e.student_id)>100
+        return f"""
+SELECT *
+FROM {tables[0]}
+LIMIT 10
 """.strip()
 
-    elif "course" in q:
-        return "SELECT * FROM courses"
-
     return "-- unable to generate sql"
+
+
+def generate_sql(
+    question,
+    tables
+):
+
+    sql = generate_sql_llm(
+        question,
+        tables
+    )
+
+    if (
+        sql is None
+        or
+        len(sql.strip()) < 15
+        or
+        sql.strip().upper() == "SELECT"
+    ):
+
+        return fallback_sql(
+            question,
+            tables
+        )
+
+    return sql
