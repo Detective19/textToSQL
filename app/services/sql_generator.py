@@ -8,6 +8,12 @@ def fallback_sql(
     tables
 ):
 
+    if not tables:
+
+        return """
+SELECT 1
+""".strip()
+
     q = question.lower()
 
     if "student" in q:
@@ -18,7 +24,11 @@ FROM {tables[0]}
 LIMIT 10
 """.strip()
 
-    return "-- unable to generate sql"
+    return f"""
+SELECT *
+FROM {tables[0]}
+LIMIT 10
+""".strip()
 
 
 def generate_sql(
@@ -32,7 +42,7 @@ def generate_sql(
     )
 
     if (
-        sql is None
+        not sql
         or
         len(sql.strip()) < 15
         or
