@@ -2,9 +2,9 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 
-from app.data.schema import SCHEMA
+from app.data.load_schema import get_schema
 
-
+SCHEMA = get_schema()
 # Load embedding model
 model = SentenceTransformer(
     "sentence-transformers/all-MiniLM-L6-v2"
